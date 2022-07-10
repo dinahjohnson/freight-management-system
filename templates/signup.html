@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="title">{% block title %} Sign Up {% endblock %}</h1>
+    <div class="content">
+            <div class="student">
+              <form method="POST" action="{{ url_for('create') }}">
+                <label for="name">Name</label><br>
+                <input type="text" id="name" name="name"><br>
+                <label for="email">Email</label><br>
+                <input type="text" id="email" name="email"><br>
+                <label for="user_type">Account Type</label><br>
+                <input type="radio" id="customer" name="user_type" value="Customer">
+                <label for="user_type">Customer</label><br>
+                <input type="radio" id="carrier" name="user_type" value="Carrier">
+               <label for="user_type">Carrier</label><br>
+               <button type="submit">Submit</button>
+              </form>
+            </div>
+    </div>
+{% endblock %}

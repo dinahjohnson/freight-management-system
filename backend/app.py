@@ -1,4 +1,5 @@
 
+from crypt import methods
 from flask import Flask, request, render_template, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -56,7 +57,6 @@ class User(db.Model):
     self.email = email
     self.user_type = user_type
 
-
 # TODO Add annotations to format_load
 def format_load(load):
   return {
@@ -81,57 +81,59 @@ def format_user(user):
     "user_type": user.user_type
   }
 
-
 # TODO Add annotations to index
 # Create index() view function to query db for all loads and pass to index.html template
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
   loads = Load.query.filter_by(status='Available').order_by(Load.ship_date.asc()).all()
   return render_template('index.html', loads=loads)
 
-# TODO Add annotations to create_user
-@app.route("/users",methods=['POST'])
-def create_user():
-   name = request.json['name']
-   email = request.json['email']
-   user_type = request.json['user_type']
-   user = User(name, email,user_type)
-   db.session.add(user)
-   db.session.commit()
+@app.route('/about', methods=['GET'])
+def about():
+  return render_template('about.html')
 
-   return format_user(user) 
+@app.route('/login',methods=['GET', 'POST'])
+def login():
+  if request.method == 'POST':
+    email = request.form['email']
+    user = User.query.filter_by(email=email).one()
+    if user.user_type == 'Customer':
+     loads = Load.query.filter_by(customer=user.id).order_by(Load.ship_date.asc()).all()
+    if user.user_type == 'Customer':
+     loads = Load.query.filter_by(carrier=user.id).order_by(Load.ship_date.asc()).all()
+    return render_template('profile.html', user = user, loads=loads)
+  return render_template('login.html')
 
-@app.route("/users/<id>",methods=['GET'])
-def get_user(id):
+@app.route('/signup', methods=['GET'])
+def signup():
+  return render_template('signup.html')
+
+# Create User
+@app.route('/user',methods=['GET','POST'])
+def create():
+  if request.method == 'POST':
+    name = request.form['name']
+    email = request.form['email']
+    user_type = request.form.getlist('user_type')
+    user = User(name, email,user_type)
+    db.session.add(user)
+    db.session.commit()
+  
+  
+    return redirect(url_for('login'))
+  return render_template('signup.html')
+
+# Get User 
+@app.route('/user/<id>', methods=['GET'])
+def profile():
   user = User.query.filter_by(id=id).one()
   user = format_user(user)
-  return {
-    "user": user
-  }
-
-# TODO Add annotations to get_users
-@app.route("/users",methods=['GET'])
-def get_users():
-  users = User.query.order_by(User.id.asc()).all()
-  users_list = []
-  for user in users:
-    users_list.append(format_user(user))
-  return {
-    "users": users_list
-  }
-
-# TODO Add annotations to get_user
-
-
-@app.route("/users/<id>", methods=['PUT'])
-def update_user(id):
-  user = User.query.filter_by(id=id)
-  name = request.json['name']
-  email = request.json['email']
-  user.update(dict(name=name, email=email))
-  db.session.commit()
-
-  return { "user": format_user(user.one()) }
+  if user.user_type == 'Customer':
+    loads = Load.query.filter_by(customer=user.id).order_by(Load.ship_date.asc()).all()
+  elif user.user_type == 'Carrier':
+    loads = Load.query.filter_by(carrier=user.id).order_by(Load.ship_date.asc()).all()
+  
+  return render_template('profile.html',user=user, loads=loads)
 
 @app.route("/users/<id>",methods=['DELETE'])
 def delete_user(id):

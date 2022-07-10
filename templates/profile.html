@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="title">{% block title %} Welcome {{ user.name }}! {% endblock %}</h1>
+    <div class="content">
+        {% for load in loads %}
+            <div class="student">
+                <p><b>Load# {{ load.id }}</b></p>
+                <b>
+                    <p class="name">Origin: {{ load.origin }}</p>
+                    <p>Destination: {{ load.destination }}</p>
+                </b>
+                <p>Rate: {{ load.rate }}</p>
+                <p>Ship Date: {{ load.ship_date }}</p>
+                <p>Deliver By: {{ load.arrive_by_date }}</p>
+                <div class="bio">
+                    <h4>Customer: {{ load.customer }} </h4>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
