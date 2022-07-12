@@ -3,8 +3,9 @@
 {% block content %}
     <h1 class="title">{% block title %} Welcome {{ user.name }}! {% endblock %}</h1>
     <div class="content">
-        {% for load in loads %}
+        {% for load in assigned_loads %}
             <div class="student">
+                <h2>Assigned Loads</h2>
                 <p><b>Load# {{ load.id }}</b></p>
                 <b>
                     <p class="name">Origin: {{ load.origin }}</p>
@@ -18,5 +19,24 @@
                 </div>
             </div>
         {% endfor %}
+        {% if user.user_type == 'Carrier' %}
+            {% for load in available_loads %}
+                <div class="student">
+                    <h2>Available Loads</h2>
+                    <p><b>Load# {{ load.id }}</b></p>
+                    <b>
+                        <p class="name">Origin: {{ load.origin }}</p>
+                        <p>Destination: {{ load.destination }}</p>
+                    </b>
+                    <p>Rate: {{ load.rate }}</p>
+                    <p>Ship Date: {{ load.ship_date }}</p>
+                    <p>Deliver By: {{ load.arrive_by_date }}</p>
+                    <div class="bio">
+                        <h4>Customer: {{ load.customer }} </h4>
+                    </div>
+                </div>
+            {% endfor %}       
+        {% endif %} 
+        
     </div>
 {% endblock %}

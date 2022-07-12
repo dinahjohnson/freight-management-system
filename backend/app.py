@@ -1,5 +1,6 @@
 
-from crypt import methods
+
+from zoneinfo import available_timezones
 from flask import Flask, request, render_template, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -97,11 +98,13 @@ def login():
   if request.method == 'POST':
     email = request.form['email']
     user = User.query.filter_by(email=email).one()
+    available_loads = Load.query.filter_by(status='Available')
+    assigned_loads = []
     if user.user_type == 'Customer':
-     loads = Load.query.filter_by(customer=user.id).order_by(Load.ship_date.asc()).all()
-    if user.user_type == 'Customer':
-     loads = Load.query.filter_by(carrier=user.id).order_by(Load.ship_date.asc()).all()
-    return render_template('profile.html', user = user, loads=loads)
+      assigned_loads = Load.query.filter_by(customer=user.id)
+    elif user.user_type == 'Carrier':
+      assigned_loads = Load.query.filter_by(carrier=user.id)
+    return render_template('profile.html', user=user,assigned_loads=assigned_loads, available_loads=available_loads)
   return render_template('login.html')
 
 @app.route('/signup', methods=['GET'])
@@ -123,17 +126,13 @@ def create():
     return redirect(url_for('login'))
   return render_template('signup.html')
 
-# Get User 
-@app.route('/user/<id>', methods=['GET'])
-def profile():
-  user = User.query.filter_by(id=id).one()
-  user = format_user(user)
-  if user.user_type == 'Customer':
-    loads = Load.query.filter_by(customer=user.id).order_by(Load.ship_date.asc()).all()
-  elif user.user_type == 'Carrier':
-    loads = Load.query.filter_by(carrier=user.id).order_by(Load.ship_date.asc()).all()
-  
-  return render_template('profile.html',user=user, loads=loads)
+# # Get User 
+# @app.route('/user/<id>', methods=['GET'])
+# def profile():
+#   available_loads = 
+
+#   return render_template('profile.html',available_loads=available_loads)
+
 
 @app.route("/users/<id>",methods=['DELETE'])
 def delete_user(id):
